@@ -10,8 +10,59 @@
 #include "linear.hpp"
 #include "max_pool_2d.hpp"
 
+void ConvBlock0(const fixed_t x0[1][28][28],
+                fixed_t x3[6][14][14],
+                const fixed_t conv0_weight[6][1][5][5],
+                const fixed_t bn0_scale[6],
+                const fixed_t bn0_bias[6],
+                const fixed_t bn0_mean[6])
+{
+#pragma HLS INLINE
+
+#pragma HLS STABLE variable=conv0_weight
+#pragma HLS STABLE variable=bn0_scale
+#pragma HLS STABLE variable=bn0_bias
+#pragma HLS STABLE variable=bn0_mean
+
+  fixed_t x1[6][28][28];
+  fixed_t x2[6][14][14];
+
+#pragma HLS ARRAY_PARTITION variable=x1 dim=1 factor=3 cyclic
+#pragma HLS ARRAY_PARTITION variable=x2 dim=1 factor=3 cyclic
+
+  Conv2d3<1, 6, 28, 28, 28, 28, 5, 2, 1, 6>(x0, x1, conv0_weight);
+  MaxPool2d2<6, 28, 28, 2, 6>(x1, x2);
+  BatchNorm2dReLU2<6, 14, 14, 6>(x2, x3, bn0_scale, bn0_bias, bn0_mean);
+}
+
+void ConvBlock1(const fixed_t x3[6][14][14],
+                fixed_t x6[16][5][5],
+                const fixed_t conv1_weight[16][6][5][5],
+                const fixed_t bn1_scale[16],
+                const fixed_t bn1_bias[16],
+                const fixed_t bn1_mean[16])
+{
+#pragma HLS INLINE
+
+#pragma HLS STABLE variable=conv1_weight
+#pragma HLS STABLE variable=bn1_scale
+#pragma HLS STABLE variable=bn1_bias
+#pragma HLS STABLE variable=bn1_mean
+
+  fixed_t x4[16][10][10];
+  fixed_t x5[16][5][5];
+
+#pragma HLS ARRAY_PARTITION variable=x4 dim=1 factor=8 cyclic
+#pragma HLS ARRAY_PARTITION variable=x5 dim=1 factor=8 cyclic
+
+  Conv2d3<6, 16, 14, 14, 10, 10, 5, 0, 1, 16>(x3, x4, conv1_weight);
+  MaxPool2d2<16, 10, 10, 2, 16>(x4, x5);
+  BatchNorm2dReLU2<16, 5, 5, 16>(x5, x6, bn1_scale, bn1_bias, bn1_mean);
+}
+
 void InferenceOptCore(hls::stream<axi_stream_data_t>& in_stream,
                       hls::stream<axi_stream_data_t>& out_stream,
+                      const int num_samples,
                       const fixed_t conv0_weight[6][1][5][5],
                       const fixed_t bn0_scale[6],
                       const fixed_t bn0_bias[6],
@@ -29,46 +80,46 @@ void InferenceOptCore(hls::stream<axi_stream_data_t>& in_stream,
 {
 #pragma HLS INLINE off
 
-  // Input, output, and intermediate results
-  fixed_t x0[1][28][28];
-  fixed_t x1[6][28][28];
-  fixed_t x2[6][14][14];
-  fixed_t x3[6][14][14];
-  fixed_t x4[16][10][10];
-  fixed_t x5[16][5][5];
-  fixed_t x6[16][5][5];
-  fixed_t x7[400];
-  fixed_t x8[120];
-  fixed_t x9[84];
-  fixed_t x10[10];
+  for (int i = 0; i < num_samples; ++i) {
+#pragma HLS PIPELINE off
 
-#pragma HLS ARRAY_PARTITION variable=x1 dim=1 factor=3 cyclic
-#pragma HLS ARRAY_PARTITION variable=x2 dim=1 factor=3 cyclic
+    // Input, output, and intermediate results
+    fixed_t x0[1][28][28];
+    // fixed_t x1[6][28][28];
+    // fixed_t x2[6][14][14];
+    fixed_t x3[6][14][14];
+    // fixed_t x4[16][10][10];
+    // fixed_t x5[16][5][5];
+    fixed_t x6[16][5][5];
+    fixed_t x7[400];
+    fixed_t x8[120];
+    fixed_t x9[84];
+    fixed_t x10[10];
+
+// #pragma HLS ARRAY_PARTITION variable=x1 dim=1 factor=3 cyclic
+// #pragma HLS ARRAY_PARTITION variable=x2 dim=1 factor=3 cyclic
 #pragma HLS ARRAY_PARTITION variable=x3 dim=1 factor=3 cyclic
-#pragma HLS ARRAY_PARTITION variable=x4 dim=1 factor=8 cyclic
-#pragma HLS ARRAY_PARTITION variable=x5 dim=1 factor=8 cyclic
+// #pragma HLS ARRAY_PARTITION variable=x4 dim=1 factor=8 cyclic
+// #pragma HLS ARRAY_PARTITION variable=x5 dim=1 factor=8 cyclic
 #pragma HLS ARRAY_PARTITION variable=x6 dim=1 factor=8 cyclic
 #pragma HLS ARRAY_PARTITION variable=x7 dim=1 factor=8 cyclic
 #pragma HLS ARRAY_PARTITION variable=x8 dim=1 factor=4 cyclic
 #pragma HLS ARRAY_PARTITION variable=x9 dim=1 factor=2 cyclic
 
-  // Read the input
-  ReadArray3d<1, 28, 28>(x0, in_stream);
+    // Read the input
+    ReadArray3d<1, 28, 28>(x0, in_stream);
 
-  // Inference
-  Conv2d3<1, 6, 28, 28, 28, 28, 5, 2, 1, 6>(x0, x1, conv0_weight);
-  MaxPool2d2<6, 28, 28, 2, 6>(x1, x2);
-  BatchNorm2dReLU2<6, 14, 14, 6>(x2, x3, bn0_scale, bn0_bias, bn0_mean);
-  Conv2d3<6, 16, 14, 14, 10, 10, 5, 0, 1, 16>(x3, x4, conv1_weight);
-  MaxPool2d2<16, 10, 10, 2, 16>(x4, x5);
-  BatchNorm2dReLU2<16, 5, 5, 16>(x5, x6, bn1_scale, bn1_bias, bn1_mean);
-  Flatten3d<16, 5, 5>(x6, x7);
-  Linear2<400, 120, true, 16>(x7, fc0_weight, fc0_bias, x8);
-  Linear2<120, 84, true, 8>(x8, fc1_weight, fc1_bias, x9);
-  Linear2<84, 10, false, 4>(x9, fc2_weight, fc2_bias, x10);
+    // Inference
+    ConvBlock0(x0, x3, conv0_weight, bn0_scale, bn0_bias, bn0_mean);
+    ConvBlock1(x3, x6, conv1_weight, bn1_scale, bn1_bias, bn1_mean);
+    Flatten3d<16, 5, 5>(x6, x7);
+    Linear2<400, 120, true, 16>(x7, fc0_weight, fc0_bias, x8);
+    Linear2<120, 84, true, 8>(x8, fc1_weight, fc1_bias, x9);
+    Linear2<84, 10, false, 4>(x9, fc2_weight, fc2_bias, x10);
 
-  // Write the output
-  WriteArray1d<10>(x10, out_stream);
+    // Write the output
+    WriteArray1d<10>(x10, out_stream);
+  }
 }
 
 void InferenceOpt(hls::stream<axi_stream_data_t>& in_stream,
@@ -118,7 +169,11 @@ void InferenceOpt(hls::stream<axi_stream_data_t>& in_stream,
     // Write the acknowledgment message
     WriteAck(out_stream);
   } else if (mode == kModeInference) {
-    InferenceOptCore(in_stream, out_stream,
+    // Get the number of samples
+    in_data = in_stream.read();
+    const int num_samples = static_cast<int>(in_data.data.to_int());
+
+    InferenceOptCore(in_stream, out_stream, num_samples,
       conv0_weight, bn0_scale, bn0_bias, bn0_mean,
       conv1_weight, bn1_scale, bn1_bias, bn1_mean,
       fc0_weight, fc0_bias, fc1_weight, fc1_bias,

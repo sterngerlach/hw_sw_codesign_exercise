@@ -186,5 +186,15 @@ vivado_add_targets(zcu104_toynet_opt3_24 InferenceOpt3
   runtime_optimized ${TCL_BOARD_DESIGN_PATH})
 vivado_add_targets(zcu104_toynet_opt3_16 InferenceOpt3
   runtime_optimized ${TCL_BOARD_DESIGN_PATH})
+vivado_add_targets(zcu104_toynet_opt3_14 InferenceOpt3
+  runtime_optimized ${TCL_BOARD_DESIGN_PATH})
+vivado_add_targets(zcu104_toynet_opt3_12 InferenceOpt3
+  runtime_optimized ${TCL_BOARD_DESIGN_PATH})
+vivado_add_targets(zcu104_toynet_opt3_11 InferenceOpt3
+  runtime_optimized ${TCL_BOARD_DESIGN_PATH})
+vivado_add_targets(zcu104_toynet_opt3_10 InferenceOpt3
+  runtime_optimized ${TCL_BOARD_DESIGN_PATH})
+vivado_add_targets(zcu104_toynet_opt3_9 InferenceOpt3
+  runtime_optimized ${TCL_BOARD_DESIGN_PATH})
 vivado_add_targets(zcu104_toynet_opt3_8 InferenceOpt3
   runtime_optimized ${TCL_BOARD_DESIGN_PATH})

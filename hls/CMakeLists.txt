@@ -173,6 +173,21 @@ hls_add_targets(zcu104_toynet_opt3_24 InferenceOpt3
 hls_add_targets(zcu104_toynet_opt3_16 InferenceOpt3
   HLS_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/src/top_opt3.cpp
   CXXFLAGS "-DBIT_WIDTH=16 -DINT_BIT_WIDTH=8")
+hls_add_targets(zcu104_toynet_opt3_14 InferenceOpt3
+  HLS_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/src/top_opt3.cpp
+  CXXFLAGS "-DBIT_WIDTH=14 -DINT_BIT_WIDTH=7")
+hls_add_targets(zcu104_toynet_opt3_12 InferenceOpt3
+  HLS_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/src/top_opt3.cpp
+  CXXFLAGS "-DBIT_WIDTH=12 -DINT_BIT_WIDTH=6")
+hls_add_targets(zcu104_toynet_opt3_11 InferenceOpt3
+  HLS_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/src/top_opt3.cpp
+  CXXFLAGS "-DBIT_WIDTH=11 -DINT_BIT_WIDTH=5")
+hls_add_targets(zcu104_toynet_opt3_10 InferenceOpt3
+  HLS_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/src/top_opt3.cpp
+  CXXFLAGS "-DBIT_WIDTH=10 -DINT_BIT_WIDTH=5")
+  hls_add_targets(zcu104_toynet_opt3_9 InferenceOpt3
+  HLS_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/src/top_opt3.cpp
+  CXXFLAGS "-DBIT_WIDTH=9 -DINT_BIT_WIDTH=4")
 hls_add_targets(zcu104_toynet_opt3_8 InferenceOpt3
   HLS_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/src/top_opt3.cpp
   CXXFLAGS "-DBIT_WIDTH=8 -DINT_BIT_WIDTH=4")

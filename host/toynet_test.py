@@ -5,8 +5,6 @@
 # sudo XILINX_XRT=/usr python3 toynet_test.py zcu104_toynet_naive.bit
 
 import numpy as np
-import os
-import pynq
 import sys
 import time
 

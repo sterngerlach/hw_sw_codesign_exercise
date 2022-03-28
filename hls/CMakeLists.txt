@@ -191,3 +191,7 @@ hls_add_targets(zcu104_toynet_opt3_10 InferenceOpt3
 hls_add_targets(zcu104_toynet_opt3_8 InferenceOpt3
   HLS_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/src/top_opt3.cpp
   CXXFLAGS "-DBIT_WIDTH=8 -DINT_BIT_WIDTH=4")
+
+hls_add_targets(zcu104_empty InferenceEmpty
+  HLS_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/src/top_empty.cpp
+  CXXFLAGS "-DBIT_WIDTH=32 -DINT_BIT_WIDTH=16")

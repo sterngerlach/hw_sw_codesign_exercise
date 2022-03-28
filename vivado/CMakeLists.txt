@@ -73,7 +73,10 @@ else()
 endif()
 
 # Path to the Tcl scripts
-set(TCL_BOARD_DESIGN_PATH ${PROJECT_SOURCE_DIR}/tcl/board_design.tcl)
+set(TCL_BOARD_DESIGN_PATH
+  ${PROJECT_SOURCE_DIR}/tcl/board_design.tcl)
+set(TCL_BOARD_DESIGN2_PATH
+  ${PROJECT_SOURCE_DIR}/tcl/board_design_ap_ctrl_none.tcl)
 set(TCL_CREATE_PROJECT_PATH ${PROJECT_SOURCE_DIR}/tcl/create_project.tcl)
 set(TCL_IMPL_EXPORT_PATH ${PROJECT_SOURCE_DIR}/tcl/impl_export.tcl)
 
@@ -83,6 +86,14 @@ if (NOT EXISTS ${TCL_BOARD_DESIGN_PATH})
 else()
   message(STATUS "Tcl script for board design: "
           ${TCL_BOARD_DESIGN_PATH})
+endif()
+
+if (NOT EXISTS ${TCL_BOARD_DESIGN2_PATH})
+  message(FATAL_ERROR "Tcl script for board design does not exist: "
+          ${TCL_BOARD_DESIGN2_PATH})
+else()
+  message(STATUS "Tcl script for board design: "
+          ${TCL_BOARD_DESIGN2_PATH})
 endif()
 
 if (NOT EXISTS ${TCL_CREATE_PROJECT_PATH})
@@ -198,3 +209,6 @@ vivado_add_targets(zcu104_toynet_opt3_9 InferenceOpt3
   runtime_optimized ${TCL_BOARD_DESIGN_PATH})
 vivado_add_targets(zcu104_toynet_opt3_8 InferenceOpt3
   runtime_optimized ${TCL_BOARD_DESIGN_PATH})
+
+vivado_add_targets(zcu104_empty InferenceEmpty
+  runtime_optimized ${TCL_BOARD_DESIGN2_PATH})
